@@ -4,7 +4,9 @@ Módulo de geração de relatórios
 """
 
 from datetime import datetime
-from typing import List
+from io import StringIO
+import csv
+from typing import List, Optional
 from database import Database
 from models import Professor, Instituicao, Vaga
 
@@ -26,7 +28,7 @@ class ReportGenerator:
     
     def _relatorio_professores_txt(self, professores: List[Professor]) -> str:
         """Gera relatório de professores em formato TXT"""
-        linhas = []
+        linhas: List[str] = []
         linhas.append("=" * 80)
         linhas.append("RELATÓRIO DE PROFESSORES SUBSTITUTOS")
         linhas.append(f"Data: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
@@ -48,14 +50,13 @@ class ReportGenerator:
         return "\n".join(linhas)
     
     def _relatorio_professores_csv(self, professores: List[Professor]) -> str:
-        """Gera relatório de professores em formato CSV"""
-        linhas = []
-        linhas.append("ID,Nome,CPF,Email,Telefone,Especialidade")
-        
+        """Gera relatório de professores em formato CSV (com aspas corretas)"""
+        buf = StringIO()
+        writer = csv.writer(buf)
+        writer.writerow(["ID", "Nome", "CPF", "Email", "Telefone", "Especialidade"])
         for prof in professores:
-            linhas.append(f"{prof.id},{prof.nome},{prof.cpf},{prof.email},{prof.telefone},{prof.especialidade}")
-        
-        return "\n".join(linhas)
+            writer.writerow([prof.id, prof.nome, prof.cpf, prof.email, prof.telefone, prof.especialidade])
+        return buf.getvalue().rstrip("\n")
     
     def gerar_relatorio_instituicoes(self, formato: str = "txt") -> str:
         """Gera relatório de todas as instituições cadastradas"""
@@ -69,7 +70,7 @@ class ReportGenerator:
     
     def _relatorio_instituicoes_txt(self, instituicoes: List[Instituicao]) -> str:
         """Gera relatório de instituições em formato TXT"""
-        linhas = []
+        linhas: List[str] = []
         linhas.append("=" * 80)
         linhas.append("RELATÓRIO DE INSTITUIÇÕES DE ENSINO")
         linhas.append(f"Data: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
@@ -90,31 +91,30 @@ class ReportGenerator:
         return "\n".join(linhas)
     
     def _relatorio_instituicoes_csv(self, instituicoes: List[Instituicao]) -> str:
-        """Gera relatório de instituições em formato CSV"""
-        linhas = []
-        linhas.append("ID,Nome,CNPJ,Endereco,Cidade,Estado")
-        
+        """Gera relatório de instituições em formato CSV (com aspas corretas)"""
+        buf = StringIO()
+        writer = csv.writer(buf)
+        writer.writerow(["ID", "Nome", "CNPJ", "Endereco", "Cidade", "Estado"])
         for inst in instituicoes:
-            linhas.append(f"{inst.id},{inst.nome},{inst.cnpj},{inst.endereco},{inst.cidade},{inst.estado}")
-        
-        return "\n".join(linhas)
+            writer.writerow([inst.id, inst.nome, inst.cnpj, inst.endereco, inst.cidade, inst.estado])
+        return buf.getvalue().rstrip("\n")
     
-    def gerar_relatorio_vagas(self, formato: str = "txt", filtro_status: str = None) -> str:
+    def gerar_relatorio_vagas(self, formato: str = "txt", filtro_status: Optional[str] = None) -> str:
         """Gera relatório de vagas"""
         vagas = self.db.listar_vagas()
-        
+
         if filtro_status:
             vagas = [v for v in vagas if v.status == filtro_status]
-        
+
         if formato == "txt":
             return self._relatorio_vagas_txt(vagas, filtro_status)
         elif formato == "csv":
             return self._relatorio_vagas_csv(vagas)
         return ""
     
-    def _relatorio_vagas_txt(self, vagas: List[Vaga], filtro_status: str = None) -> str:
+    def _relatorio_vagas_txt(self, vagas: List[Vaga], filtro_status: Optional[str] = None) -> str:
         """Gera relatório de vagas em formato TXT"""
-        linhas = []
+        linhas: List[str] = []
         linhas.append("=" * 80)
         titulo = "RELATÓRIO DE VAGAS"
         if filtro_status:
@@ -127,8 +127,10 @@ class ReportGenerator:
         linhas.append("")
         
         for i, vaga in enumerate(vagas, 1):
-            instituicao = self.db.buscar_instituicao(vaga.instituicao_id)
-            inst_nome = instituicao.nome if instituicao else "N/A"
+            inst_nome = "N/A"
+            if vaga.instituicao_id is not None:
+                instituicao = self.db.buscar_instituicao(vaga.instituicao_id)
+                inst_nome = instituicao.nome if instituicao else "N/A"
             
             linhas.append(f"{i}. Vaga: {vaga.disciplina}")
             linhas.append(f"   Instituição: {inst_nome}")
@@ -150,19 +152,17 @@ class ReportGenerator:
         return "\n".join(linhas)
     
     def _relatorio_vagas_csv(self, vagas: List[Vaga]) -> str:
-        """Gera relatório de vagas em formato CSV"""
-        linhas = []
-        linhas.append("ID,Instituicao_ID,Disciplina,Carga_Horaria,Salario,Status,Professor_ID,Data_Cadastro")
-        
+        """Gera relatório de vagas em formato CSV (com aspas corretas)"""
+        buf = StringIO()
+        writer = csv.writer(buf)
+        writer.writerow(["ID", "Instituicao_ID", "Disciplina", "Carga_Horaria", "Salario", "Status", "Professor_ID", "Data_Cadastro"])
         for vaga in vagas:
-            linhas.append(f"{vaga.id},{vaga.instituicao_id},{vaga.disciplina},{vaga.carga_horaria},"
-                         f"{vaga.salario},{vaga.status},{vaga.professor_id},{vaga.data_cadastro}")
-        
-        return "\n".join(linhas)
+            writer.writerow([vaga.id, vaga.instituicao_id, vaga.disciplina, vaga.carga_horaria, vaga.salario, vaga.status, vaga.professor_id, vaga.data_cadastro])
+        return buf.getvalue().rstrip("\n")
     
     def gerar_relatorio_completo(self) -> str:
         """Gera um relatório completo do sistema"""
-        linhas = []
+        linhas: List[str] = []
         linhas.append("=" * 80)
         linhas.append("RELATÓRIO COMPLETO DO SISTEMA")
         linhas.append(f"Data: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
@@ -189,7 +189,7 @@ class ReportGenerator:
         linhas.append("")
         
         # Especialidades mais demandadas
-        especialidades = {}
+        especialidades: dict[str, int] = {}
         for vaga in vagas:
             if vaga.status == "Aberta":
                 disc = vaga.disciplina

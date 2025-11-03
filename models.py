@@ -4,7 +4,7 @@ Models para o sistema de cadastro de professores substitutos
 """
 
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Any, Dict
 
 class Professor:
     """Classe para representar um professor substituto"""
@@ -21,7 +21,7 @@ class Professor:
     def __repr__(self):
         return f"Professor({self.id}, {self.nome}, {self.especialidade})"
     
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         return {
             'id': self.id,
             'nome': self.nome,
@@ -47,7 +47,7 @@ class Instituicao:
     def __repr__(self):
         return f"Instituicao({self.id}, {self.nome}, {self.cidade})"
     
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         return {
             'id': self.id,
             'nome': self.nome,
@@ -77,7 +77,7 @@ class Vaga:
     def __repr__(self):
         return f"Vaga({self.id}, {self.disciplina}, {self.status})"
     
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         return {
             'id': self.id,
             'instituicao_id': self.instituicao_id,

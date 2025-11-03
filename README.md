@@ -18,9 +18,11 @@ Sistema completo de gestão de professores substitutos com interface gráfica us
 
 ## Instalação
 
-1. Instale as dependências:
+1. Crie e ative um ambiente virtual (recomendado) e instale as dependências:
 ```bash
-pip install raylib
+python -m venv .venv
+.venv\\Scripts\\activate
+pip install -r requirements.txt
 ```
 
 2. Execute o aplicativo:

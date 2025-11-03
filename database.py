@@ -16,7 +16,13 @@ class Database:
     
     def get_connection(self):
         """Cria uma conexão com o banco de dados"""
-        return sqlite3.connect(self.db_name)
+        conn = sqlite3.connect(self.db_name)
+        # Garantir integridade referencial no SQLite (desabilitado por padrão)
+        try:
+            conn.execute('PRAGMA foreign_keys = ON')
+        except Exception:
+            pass
+        return conn
     
     def create_tables(self):
         """Cria as tabelas do banco de dados"""
@@ -80,7 +86,8 @@ class Database:
         ''', (professor.nome, professor.cpf, professor.email, 
               professor.telefone, professor.especialidade))
         
-        professor_id = cursor.lastrowid
+        assert cursor.lastrowid is not None
+        professor_id: int = cursor.lastrowid
         conn.commit()
         conn.close()
         
@@ -95,7 +102,7 @@ class Database:
         rows = cursor.fetchall()
         conn.close()
         
-        professores = []
+        professores: List[Professor] = []
         for row in rows:
             prof = Professor(
                 id=row[0], nome=row[1], cpf=row[2],
@@ -159,7 +166,8 @@ class Database:
         ''', (instituicao.nome, instituicao.cnpj, instituicao.endereco,
               instituicao.cidade, instituicao.estado))
         
-        instituicao_id = cursor.lastrowid
+        assert cursor.lastrowid is not None
+        instituicao_id: int = cursor.lastrowid
         conn.commit()
         conn.close()
         
@@ -174,7 +182,7 @@ class Database:
         rows = cursor.fetchall()
         conn.close()
         
-        instituicoes = []
+        instituicoes: List[Instituicao] = []
         for row in rows:
             inst = Instituicao(
                 id=row[0], nome=row[1], cnpj=row[2],
@@ -239,7 +247,8 @@ class Database:
         ''', (vaga.instituicao_id, vaga.disciplina, vaga.carga_horaria, vaga.salario,
               vaga.descricao, vaga.status, vaga.professor_id, vaga.data_cadastro))
         
-        vaga_id = cursor.lastrowid
+        assert cursor.lastrowid is not None
+        vaga_id: int = cursor.lastrowid
         conn.commit()
         conn.close()
         
@@ -254,7 +263,7 @@ class Database:
         rows = cursor.fetchall()
         conn.close()
         
-        vagas = []
+        vagas: List[Vaga] = []
         for row in rows:
             vaga = Vaga(
                 id=row[0], instituicao_id=row[1], disciplina=row[2],
