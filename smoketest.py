@@ -1,6 +1,6 @@
-from database import Database
-from models import Professor, Instituicao, Vaga
-from reports import ReportGenerator
+from app.database import Database
+from app.models import Professor, Instituicao, Vaga
+from app.reports import ReportGenerator
 import os
 
 db_path = 'tmp_smoketest.db'

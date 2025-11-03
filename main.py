@@ -7,15 +7,15 @@ Autor: Sistema de Gestão Acadêmica
 Data: Novembro 2025
 """
 
-from database import Database
-from gui import GUI
+from app.database import Database
+from app.gui import GUI
 
 def main():
     """Função principal do aplicativo"""
     print("Iniciando Sistema de Professores Substitutos...")
     
-    # Inicializar banco de dados
-    db = Database("sistema_professores.db")
+    # Inicializar banco de dados (usar caminho padrão em data/)
+    db = Database()
     print("Banco de dados inicializado!")
     
     # Inicializar interface gráfica
